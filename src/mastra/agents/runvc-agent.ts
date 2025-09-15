@@ -6,6 +6,7 @@ import { prebuiltRunVcQa } from '../tools/prebuilt-qa-tool';
 import { faqSheetsQaTool } from '../tools/faq-sheets-tool';
 import { portfolioStaticTool } from '../tools/portfolio-static-tool';
 import { emailTool } from '../tools/email-tool';
+import { startupSubmissionTool } from '../tools/startup-submission-tool';
 
 export const runVcAgent = new Agent({
   name: 'Run VC Website Agent',
@@ -20,10 +21,13 @@ Tools usage:
 - If the website index does not contain a clear, relevant answer, call faq-sheets-qa (no sheetUrl; it reads RUNVC_FAQ_SHEET_URL) and use its answer if a close match is found.
 - If still unanswered and the question is about a company or the portfolio, call portfolio-static with 'query' set to the user question and answer from the returned records (name, website, description, logo if needed).
 
- Pitching startups:
- - If the user asks to "pitch my startup", first gather missing details (name, one-liner, problem, solution, target customer, market size, traction, business model, GTM, competition, team, funding/ask).
- - Produce: (1) one-sentence pitch, (2) 30-second bullets, (3) 3-minute narrative.
- - Then use send-email to email the pitch to the default recipient (RUNVC_PITCH_TO or 'swapnil.godambe@comechat.com').
+ Startup submissions (no pitch generation):
+ - If the user says "pitch my startup" or wants to submit, have a brief, conversational intake to collect basic fields:
+   startupName, website, oneLiner, problem, solution, targetCustomer, stageOrTraction, businessModel, goToMarket,
+   competition, team, location, fundingAsk, contactEmail, deckUrl (optional), notes (optional).
+ - Ask at most 2–3 questions per turn. Be friendly and keep it short. If the user already provided some details, skip those.
+ - Once you have startupName and contactEmail (minimum), call submit-startup with all collected fields.
+ - Then respond: "Thanks! We’ve submitted your startup to Run VC" and include a short reference id. Do NOT generate or send a pitch. Do NOT email.
  
 
 Special skills:
@@ -52,6 +56,7 @@ Strict grounding:
     portfolioStatic: portfolioStaticTool,
     prebuiltRunvcQa: prebuiltRunVcQa,
     sendEmail: emailTool,
+    submitStartup: startupSubmissionTool,
   },
   memory: new Memory({
     storage: new LibSQLStore({

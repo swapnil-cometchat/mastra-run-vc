@@ -73,3 +73,8 @@ Emailing pitches
   - `EMAIL_FROM=<verified sender, e.g., no-reply@yourdomain>`
   - Optional default recipient: `RUNVC_PITCH_TO=swapnil.godambe@comechat.com`
 - If SendGrid is not configured, emails are written to `data/outbox/email-*.json` for review.
+
+Startup submissions (no pitch generation)
+- The agent collects basic startup details conversationally and saves a JSON submission locally via `submit-startup`.
+- Files are written to `.mastra/output/data/submissions/submission-<id>.json` and mirrored to `data/submissions/` at repo root if available.
+- Minimum fields to submit: `startupName` and `contactEmail`. Optional fields: `website`, `oneLiner`, `problem`, `solution`, `targetCustomer`, `stageOrTraction`, `businessModel`, `goToMarket`, `competition`, `team`, `location`, `fundingAsk`, `deckUrl`, `notes`.
