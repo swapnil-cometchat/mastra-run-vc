@@ -2,7 +2,7 @@ Mastra Run VC Web + Chat
 
 What’s included
 - Run VC website agent that can crawl https://run.vc and answer questions grounded in site content.
-- Tools: `scrape-webpage`, `website-qa`, `append-to-sheet` (CSV stand-in for Google Sheets MCP).
+- Tools: `scrape-webpage`, `website-qa`. FAQ answers come from Google Sheets via `faq-sheets-qa`. Static portfolio via `portfolio-static`.
 - Weather sample agent preserved.
 
 Getting started
@@ -26,9 +26,7 @@ Embed elsewhere
 - Note: Some sites disallow iframing via `X-Frame-Options` or CSP `frame-ancestors`. If that happens, consider a proxy renderer approach; I can add a simple proxy mode if needed.
 
 Google Sheets via MCP
-- This repo ships a CSV-based stand-in tool (`append-to-sheet`) to avoid extra setup.
-- To use Google Sheets via MCP in production, swap the tool with an MCP client that connects to a Google Sheets MCP server and maps calls to your spreadsheet.
-- Suggested schema for rows: `{ timestamp, userPrompt, responseType, summary, sources[] }`.
+ 
 
 Notes
 - This setup does not have the agent scraping; the page just displays the site and your CometChat widget handles Q&A.
@@ -38,6 +36,7 @@ FAQs from Google Sheets
   - `RUNVC_FAQ_SHEET_URL=<your Google Sheet link>` (include `gid=` for the tab to use)
 - Make the sheet accessible: Share with “Anyone with the link can view” or Publish to the web.
 - The agent calls the `faq-sheets-qa` tool first for every question and uses its answer if a close match is found.
+- Cache TTL: set `RUNVC_FAQ_TTL_MINUTES` (default 10). Set to `1` for near real-time updates as you edit the sheet.
 
 Static portfolio data
 - The agent can answer portfolio questions from a static file: `data/runvc_portfolio.json`.

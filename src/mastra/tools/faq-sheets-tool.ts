@@ -167,7 +167,9 @@ export const faqSheetsQaTool = createTool({
   }),
   execute: async ({ context }) => {
     const { question, sheetUrl, gid, ttlMinutes } = context;
-    const { entries, source } = await loadFaqEntries(sheetUrl, gid ? String(gid) : undefined, ttlMinutes);
+    const envTtl = process.env.RUNVC_FAQ_TTL_MINUTES ? Number(process.env.RUNVC_FAQ_TTL_MINUTES) : undefined;
+    const effectiveTtl = Number.isFinite(envTtl) ? (envTtl as number) : ttlMinutes;
+    const { entries, source } = await loadFaqEntries(sheetUrl, gid ? String(gid) : undefined, effectiveTtl);
     if (!entries.length) {
       return { answer: 'No FAQs found in the sheet.', matches: [], source, usedEntries: 0 };
     }
@@ -191,4 +193,3 @@ export const faqSheetsQaTool = createTool({
     };
   },
 });
-

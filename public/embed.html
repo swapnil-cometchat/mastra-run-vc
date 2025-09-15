@@ -42,13 +42,7 @@
         background: #fff;
         z-index: 0; /* keep behind overlays */
       }
-      .note {
-        position: absolute;
-        left: 12px; bottom: 12px;
-        font-size: 12px;
-        opacity: 0.6;
-        z-index: 1;
-      }
+      /* removed helper note */
       #cometChatMount { position: relative; z-index: 9999; }
     </style>
     <script defer src="https://cdn.jsdelivr.net/npm/@cometchat/chat-embed@latest/dist/main.js"></script>
@@ -61,7 +55,7 @@
       </div>
       <div class="content">
         <iframe id="site-frame" src="about:blank" referrerpolicy="no-referrer-when-downgrade" allow="clipboard-read; clipboard-write; autoplay; encrypted-media"></iframe>
-        <div class="note">Tip: add ?u=https://run.vc to set site URL</div>
+        
       </div>
       <div id="cometChatMount"></div>
     </div>
