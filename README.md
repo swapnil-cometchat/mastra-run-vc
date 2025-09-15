@@ -32,3 +32,22 @@ Google Sheets via MCP
 
 Notes
 - This setup does not have the agent scraping; the page just displays the site and your CometChat widget handles Q&A.
+
+Pre-crawl and index (recommended for QA)
+- Crawl run.vc and build a local vector index:
+  - `npm run crawl:runvc` — fetches pages into `data/runvc_pages.json`
+  - `npm run index:runvc` — builds embeddings index into `data/runvc_index.json`
+- The agent tool `prebuilt-runvc-qa` uses this index to answer questions strictly from run.vc content.
+- You can re-run these commands whenever the site changes.
+- Auto-run on agent start: `npm run dev` and `npm start` will run `src/mastra/scripts/ensure-index.ts` first.
+  - It builds the index if missing or older than `RUNVC_INDEX_TTL_HOURS` (default 24h).
+  - Override: set `RUNVC_INDEX_TTL_HOURS=0` to force rebuild every run, or increase to reduce frequency.
+
+Portfolio export
+- Running `npm run crawl:runvc` also extracts the Portfolio page into structured files:
+  - `data/runvc_portfolio.json` — `{ companies: [{ name, website, logo, description }] }`
+  - `data/runvc_portfolio.csv` — CSV with columns `name,website,logo,description`
+  Use these for display, validations, or to seed other systems.
+
+Wiring to your chat backend
+- If you want an HTTP endpoint to serve answers from the prebuilt index (for CometChat webhooks or extensions), I can add `POST /api/ask` that reads `data/runvc_index.json`, embeds the query, retrieves top-K, and returns `{ answer, sources }`.

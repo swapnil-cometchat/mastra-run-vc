@@ -9,6 +9,19 @@ export function htmlToText(html: string): string {
   let cleaned = html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ');
 
+  // surface helpful attributes before tag stripping
+  // 1) <img alt="...">
+  cleaned = cleaned.replace(/<img\b[^>]*\balt=["']([^"']+)["'][^>]*>/gi, ' $1 ');
+  // 2) Any aria-label
+  cleaned = cleaned.replace(/<([a-z0-9:-]+)\b[^>]*\baria-label=["']([^"']+)["'][^>]*>/gi, ' $2 ');
+  // 3) Anchors with title when no inner text
+  cleaned = cleaned.replace(/<a\b[^>]*\btitle=["']([^"']+)["'][^>]*>\s*<\/a>/gi, ' $1 ');
+  // 4) Common data-* name hints
+  cleaned = cleaned.replace(/<([a-z0-9:-]+)[^>]*\bdata-(name|title)=["']([^"']+)["'][^>]*>/gi, ' $3 ');
+  // 5) Basic OpenGraph meta
+  cleaned = cleaned.replace(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["'][^>]*>/gi, '\n# $1\n');
+  cleaned = cleaned.replace(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']+)["'][^>]*>/gi, '\n$1\n');
+
   // mark headings to aid splitting
   cleaned = cleaned
     .replace(/<(h1)[^>]*>([\s\S]*?)<\/\1>/gi, '\n# $2\n')

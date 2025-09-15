@@ -4,10 +4,15 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "predev": "node --env-file=.env src/mastra/scripts/ensure-index.mjs",
     "dev": "mastra dev",
     "build": "mastra build",
+    "prestart": "node --env-file=.env src/mastra/scripts/ensure-index.mjs",
     "start": "mastra start",
-    "web": "node src/web/server.mjs"
+    "web": "node src/web/server.mjs",
+    "crawl:runvc": "node --env-file=.env src/mastra/scripts/crawl-runvc.mjs",
+    "index:runvc": "node --env-file=.env src/mastra/scripts/index-runvc.mjs",
+    "build:index": "npm run crawl:runvc && npm run index:runvc"
   },
   "keywords": [],
   "author": "",
