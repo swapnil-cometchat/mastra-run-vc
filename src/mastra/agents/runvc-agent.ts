@@ -2,8 +2,6 @@ import { openai } from '@ai-sdk/openai';
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
-import { websiteQaTool } from '../tools/website-qa-tool';
-import { webScraperTool } from '../tools/web-scraper-tool';
 import { sheetsCsvTool } from '../tools/sheets-csv-tool';
 import { prebuiltRunVcQa } from '../tools/prebuilt-qa-tool';
 
@@ -17,8 +15,6 @@ You are the Run VC website assistant. Your goals:
 
 Tools usage:
 - First, call prebuilt-runvc-qa to retrieve relevant context from the pre-crawled index.
-- If the prebuilt index lacks the answer and live fetch is allowed, call website-qa with base URL https://run.vc.
-- If the user needs a single page's content, use scrape-webpage.
 - If asked to log outputs to a sheet, use append-to-sheet with an appropriate schema.
 
 Special skills:
@@ -32,7 +28,7 @@ Special skills:
 - Investor question checklist: If the user is a startup investor or asks what to ask, provide a compact checklist grouped by Market, Product, Team, Traction, Unit Economics, GTM, Tech/Regulatory, Risks, and Deal.
 
 Formatting:
-- Always include a short 'Sources' section when you used website-qa, listing distinct URLs.
+- Always include a short 'Sources' section, listing distinct URLs used from context.
 - If you logged to a sheet, confirm file path and number of rows.
 
 Strict grounding:
@@ -43,8 +39,6 @@ Strict grounding:
   model: openai('gpt-4o-mini'),
   tools: {
     prebuiltRunvcQa: prebuiltRunVcQa,
-    websiteQa: websiteQaTool,
-    scrapeWebpage: webScraperTool,
     appendToSheet: sheetsCsvTool,
   },
   memory: new Memory({

@@ -90,23 +90,7 @@ export const websiteQaTool = createTool({
     const { url, question, maxPages, maxDepth, sameOriginOnly } = context;
 
     const visited = new Set<string>();
-    const queue: QueueItem[] = [];
-    // Seed likely portfolio/investments pages first for better recall
-    try {
-      const base = new URL(url);
-      const origin = base.origin;
-      const seeds = [
-        normalizeUrl(url),
-        normalizeUrl(origin + '/portfolio'),
-        normalizeUrl(origin + '/investments'),
-        normalizeUrl(origin + '/companies'),
-        normalizeUrl(origin + '/portfolio/companies'),
-      ];
-      const uniq = Array.from(new Set(seeds));
-      for (const s of uniq) queue.push({ url: s, depth: 0 });
-    } catch {
-      queue.push({ url: normalizeUrl(url), depth: 0 });
-    }
+    const queue: QueueItem[] = [{ url: normalizeUrl(url), depth: 0 }];
     const results: { url: string; text: string; links?: string[] }[] = [];
 
     while (queue.length && results.length < maxPages) {
@@ -143,9 +127,7 @@ export const websiteQaTool = createTool({
     for (const r of results) {
       const chunks = chunkText(r.text);
       for (const c of chunks) {
-        let s = relevanceScore(question, c) + (c.startsWith('#') ? 0.1 : 0); // slight boost for headings
-        // Boost pages likely to contain companies/portfolio info
-        if (/\/portfolio|\/companies|\/investments/i.test(r.url)) s += 0.25;
+        const s = relevanceScore(question, c) + (c.startsWith('#') ? 0.1 : 0); // slight boost for headings
         if (s > 0) scored.push({ url: r.url, text: c, score: s });
       }
     }
