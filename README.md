@@ -33,6 +33,12 @@ Google Sheets via MCP
 Notes
 - This setup does not have the agent scraping; the page just displays the site and your CometChat widget handles Q&A.
 
+FAQs from Google Sheets
+- Set the env var in `.env`:
+  - `RUNVC_FAQ_SHEET_URL=<your Google Sheet link>` (include `gid=` for the tab to use)
+- Make the sheet accessible: Share with “Anyone with the link can view” or Publish to the web.
+- The agent calls the `faq-sheets-qa` tool first for every question and uses its answer if a close match is found.
+
 Pre-crawl and index (recommended for QA)
 - Crawl run.vc and build a local vector index:
   - `npm run crawl:runvc` — fetches pages into `data/runvc_pages.json`
