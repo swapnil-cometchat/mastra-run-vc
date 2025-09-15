@@ -62,3 +62,11 @@ Pre-crawl and index (recommended for QA)
 
 Wiring to your chat backend
 - If you want an HTTP endpoint to serve answers from the prebuilt index (for CometChat webhooks or extensions), I can add `POST /api/ask` that reads `data/runvc_index.json`, embeds the query, retrieves top-K, and returns `{ answer, sources }`.
+Emailing pitches
+- The agent can email a generated pitch using the `send-email` tool.
+- Configure SendGrid (recommended):
+  - `EMAIL_PROVIDER=sendgrid`
+  - `SENDGRID_API_KEY=<your key>`
+  - `EMAIL_FROM=<verified sender, e.g., no-reply@yourdomain>`
+  - Optional default recipient: `RUNVC_PITCH_TO=swapnil.godambe@comechat.com`
+- If SendGrid is not configured, emails are written to `data/outbox/email-*.json` for review.

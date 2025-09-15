@@ -5,6 +5,7 @@ import { LibSQLStore } from '@mastra/libsql';
 import { prebuiltRunVcQa } from '../tools/prebuilt-qa-tool';
 import { faqSheetsQaTool } from '../tools/faq-sheets-tool';
 import { portfolioStaticTool } from '../tools/portfolio-static-tool';
+import { emailTool } from '../tools/email-tool';
 
 export const runVcAgent = new Agent({
   name: 'Run VC Website Agent',
@@ -19,6 +20,11 @@ Tools usage:
 - Pass no sheetUrl; the tool will read RUNVC_FAQ_SHEET_URL from the environment. If missing, ask the user for the sheet link and retry.
 - If faq-sheets-qa returns "No close FAQ match found." and the question is about the portfolio or companies, call portfolio-static and present the list.
 - Otherwise, call prebuilt-runvc-qa to retrieve relevant context from the pre-crawled index.
+
+ Pitching startups:
+ - If the user asks to "pitch my startup", first gather missing details (name, one-liner, problem, solution, target customer, market size, traction, business model, GTM, competition, team, funding/ask).
+ - Produce: (1) one-sentence pitch, (2) 30-second bullets, (3) 3-minute narrative.
+ - Then use send-email to email the pitch to the default recipient (RUNVC_PITCH_TO or 'swapnil.godambe@comechat.com').
  
 
 Special skills:
@@ -46,6 +52,7 @@ Strict grounding:
     faqSheetsQa: faqSheetsQaTool,
     portfolioStatic: portfolioStaticTool,
     prebuiltRunvcQa: prebuiltRunVcQa,
+    sendEmail: emailTool,
   },
   memory: new Memory({
     storage: new LibSQLStore({
