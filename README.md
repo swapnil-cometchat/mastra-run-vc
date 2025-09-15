@@ -1,8 +1,8 @@
 Mastra Run VC Web + Chat
 
 What’s included
-- Run VC website agent that can crawl https://run.vc and answer questions grounded in site content.
-- Tools: `scrape-webpage`, `website-qa`. FAQ answers come from Google Sheets via `faq-sheets-qa`. Static portfolio via `portfolio-static`.
+- Run VC website agent that pre-crawls https://run.vc and answers from that saved data.
+- Tools: `prebuilt-runvc-qa` (website index), `faq-sheets-qa` (Google Sheet), `portfolio-static` (static JSON).
 
 Getting started
 - Prereq: Node 20+.
@@ -24,7 +24,6 @@ Embed elsewhere
 - You can embed `public/embed.html` itself in another site via iframe, or host it directly.
 - Note: Some sites disallow iframing via `X-Frame-Options` or CSP `frame-ancestors`. If that happens, consider a proxy renderer approach; I can add a simple proxy mode if needed.
 
-Google Sheets via MCP
  
 
 Notes
@@ -52,7 +51,7 @@ Answering priority
 - Company-specific questions: checks static portfolio data first (portfolio-static), then FAQs, then the website index.
 - All other questions: checks FAQs first (faq-sheets-qa), then falls back to the website index (prebuilt-runvc-qa).
 
-Pre-crawl and index (recommended for QA)
+Pre-crawl and index (website data)
 - Crawl run.vc and build a local vector index:
   - `npm run crawl:runvc` — fetches pages into `data/runvc_pages.json`
   - `npm run index:runvc` — builds embeddings index into `data/runvc_index.json`
