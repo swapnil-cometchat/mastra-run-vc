@@ -1,7 +1,8 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
 import { embedTexts, cosineSimilarity } from './embedding-util';
 
 type IndexItem = { id: string; url: string; text: string; embedding: number[] };
@@ -11,7 +12,21 @@ let cache: { index?: IndexFile } = {};
 
 async function loadIndex(): Promise<IndexFile> {
   if (cache.index) return cache.index;
-  const path = join(process.cwd(), 'data', 'runvc_index.json');
+  const override = process.env.RUNVC_INDEX_PATH;
+  const candidates = [
+    override ? resolve(override) : undefined,
+    join(process.cwd(), 'data', 'runvc_index.json'), // .mastra/output/data
+    resolve(process.cwd(), '..', '..', 'data', 'runvc_index.json'), // repoRoot/data when cwd=.mastra/output
+    resolve(process.cwd(), 'data', 'runvc_index.json'), // cwd already repo root
+  ].filter(Boolean) as string[];
+
+  const path = candidates.find((p) => existsSync(p));
+  if (!path) {
+    throw new Error(
+      `Prebuilt index not found. Tried: ${candidates.join(', ')}. ` +
+        `Set RUNVC_INDEX_PATH to an absolute path or ensure runvc_index.json exists under data/.`,
+    );
+  }
   const raw = await readFile(path, 'utf8');
   const idx = JSON.parse(raw) as IndexFile;
   cache.index = idx;
@@ -59,4 +74,3 @@ export const prebuiltRunVcQa = createTool({
     };
   },
 });
-

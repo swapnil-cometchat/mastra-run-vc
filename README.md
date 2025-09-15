@@ -48,6 +48,10 @@ Static portfolio data
   - `.mastra/output/data/runvc_portfolio.json`, then `../data/runvc_portfolio.json` (repo root)
   - Or set `RUNVC_PORTFOLIO_PATH=/absolute/path/to/runvc_portfolio.json` to override.
 
+Answering priority
+- Company-specific questions: checks static portfolio data first (portfolio-static), then FAQs, then the website index.
+- All other questions: checks FAQs first (faq-sheets-qa), then falls back to the website index (prebuilt-runvc-qa).
+
 Pre-crawl and index (recommended for QA)
 - Crawl run.vc and build a local vector index:
   - `npm run crawl:runvc` — fetches pages into `data/runvc_pages.json`

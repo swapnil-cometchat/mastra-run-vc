@@ -96,14 +96,13 @@ export const emailTool = createTool({
       if (!apiKey) {
         // fall back to file when not configured
         const path = await writeToOutbox({ to: toList, subject: context.subject, text: context.text, html: context.html, from });
-        return { provider: 'file', message: `Email written to ${path}`, outboxPath: path };
+        return { provider: 'file' as const, message: `Email written to ${path}`, outboxPath: path };
       }
       await sendViaSendgrid({ to: toList, subject: context.subject, text: context.text, html: context.html, from, apiKey });
-      return { provider: 'sendgrid', message: 'Email sent via SendGrid' };
+      return { provider: 'sendgrid' as const, message: 'Email sent via SendGrid' };
     }
 
     const path = await writeToOutbox({ to: toList, subject: context.subject, text: context.text, html: context.html, from });
-    return { provider: 'file', message: `Email written to ${path}`, outboxPath: path };
+    return { provider: 'file' as const, message: `Email written to ${path}`, outboxPath: path };
   },
 });
-
