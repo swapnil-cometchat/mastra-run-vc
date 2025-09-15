@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Website + CometChat</title>
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        background: #0b0b0f;
+        color: #fff;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      }
+      .wrap {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .topbar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        background: #0b0b0f;
+      }
+      .topbar img {
+        height: 26px;
+      }
+      .content {
+        flex: 1;
+        position: relative;
+        min-height: 0; /* allow child to size within flex */
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #fff;
+        z-index: 0; /* keep behind overlays */
+      }
+      .note {
+        position: absolute;
+        left: 12px; bottom: 12px;
+        font-size: 12px;
+        opacity: 0.6;
+        z-index: 1;
+      }
+      #cometChatMount { position: relative; z-index: 9999; }
+    </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/@cometchat/chat-embed@latest/dist/main.js"></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <img src="https://cdn.prod.website-files.com/65a80527f6e9a68a541c8a16/65a81653e01962ce95c8d9f5_run-white.svg" alt="run.vc" />
+        <div>Website Preview</div>
+      </div>
+      <div class="content">
+        <iframe id="site-frame" src="about:blank" referrerpolicy="no-referrer-when-downgrade" allow="clipboard-read; clipboard-write; autoplay; encrypted-media"></iframe>
+        <div class="note">Tip: add ?u=https://run.vc to set site URL</div>
+      </div>
+      <div id="cometChatMount"></div>
+    </div>
+
+    <script>
+      // CometChat Chat Embed (uses CometChatApp global)
+      const COMETCHAT_CREDENTIALS = {
+        appID: "271286734ee57fe5",
+        appRegion: "in",
+        authKey: "cb98bf23afe6e5900ee21e6e2c37a8bf126ef94f",
+      };
+
+      const COMETCHAT_LAUNCH_OPTIONS = {
+        targetElementID: 'cometChatMount',
+        isDocked: true,
+        width: '500px',
+        height: '500px',
+        chatType: 'user',
+        defaultChatID: '5d6c5891-fcaa-4d0e-ac69-9b7a4f7d3dbd',
+        variantID: '68c3feb7227251147a0e30fc',
+        dockedAlignment: 'right',
+      };
+
+      // Read UID from query (?uid=...) or fallback to placeholder
+      const params = new URLSearchParams(location.search);
+      const COMETCHAT_USER_UID = 'cometchat-uid-1';
+
+      function setIframeFromQuery() {
+        const params = new URLSearchParams(location.search);
+        const u = params.get('u') || 'https://run.vc';
+        const frame = document.getElementById('site-frame');
+        try {
+          const url = new URL(u);
+          frame.src = url.toString();
+        } catch {
+          frame.src = 'about:blank';
+        }
+      }
+
+      window.addEventListener('load', () => {
+        setIframeFromQuery();
+        if (!window.CometChatApp) {
+          console.error('CometChat Chat Embed script not loaded');
+          return;
+        }
+        CometChatApp.init(COMETCHAT_CREDENTIALS)
+          .then(() => CometChatApp.login({ uid: COMETCHAT_USER_UID }))
+          .then(() => CometChatApp.launch(COMETCHAT_LAUNCH_OPTIONS))
+          .then(() => console.log('[CometChat] Chat launched'))
+          .catch((error) => console.error('[CometChat] Error:', error));
+      });
+    </script>
+  </body>
+  </html>

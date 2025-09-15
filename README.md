@@ -1,4 +1,4 @@
-Mastra Run VC Agent
+Mastra Run VC Web + Chat
 
 What’s included
 - Run VC website agent that can crawl https://run.vc and answer questions grounded in site content.
@@ -6,20 +6,24 @@ What’s included
 - Weather sample agent preserved.
 
 Getting started
-- Prereq: Node 20+, set `OPENAI_API_KEY` in `.env`.
-- Run dev server: `npm run dev`.
-- Open the Playground URL shown in the console and select `Run VC Website Agent`.
+- Prereq: Node 20+.
+- Option A — Mastra playground (agents): `npm run dev` (unchanged; for reference only).
+- Option B — Website + CometChat widget page: `npm run web` then open `http://localhost:8080`.
 
-Using the agent
-- Ask questions like: “What is Run VC?”, “How do I pitch my startup?”, “What is on the run.vc homepage?”
-- The agent crawls a bounded number of pages and cites sources.
-- For a pitch request, it will gather details then produce a 1‑sentence, 30‑second, and 3‑minute pitch.
-- To log results to a sheet, ask “Log this to a sheet named ‘runvc_leads’”. The tool appends rows to `data/runvc_leads.csv`.
+Website + CometChat widget
+- File: `public/embed.html` — Minimal page that:
+  - Iframes any site (default `https://run.vc`, override with `?u=<url>`)
+  - Mounts the CometChat Chat Embed widget for chat
+- The page loads: `https://cdn.jsdelivr.net/npm/@cometchat/chat-embed@latest/dist/main.js`
+- Configure inside `public/embed.html`:
+  - `COMETCHAT_CREDENTIALS` (appID, appRegion, authKey)
+  - `COMETCHAT_LAUNCH_OPTIONS` (targetElementID, isDocked, width/height, chatType, defaultChatID, variantID)
+  - Provide the user UID via query param: `?uid=<yourUserUid>` or edit `COMETCHAT_USER_UID` placeholder
+- Preview: `http://localhost:8080?u=https://run.vc&uid=<yourUserUid>`
 
-Embed in an iframe
-- After `npm run dev`, the Playground is available locally. You can embed it in your site with an iframe, for example:
-  <iframe src="http://localhost:8787/playground" style="width:100%;height:700px;border:0;" title="Run VC Agent"></iframe>
-- Tip: You can constrain the UI via your container (e.g., hide headers) if you want a minimal look.
+Embed elsewhere
+- You can embed `public/embed.html` itself in another site via iframe, or host it directly.
+- Note: Some sites disallow iframing via `X-Frame-Options` or CSP `frame-ancestors`. If that happens, consider a proxy renderer approach; I can add a simple proxy mode if needed.
 
 Google Sheets via MCP
 - This repo ships a CSV-based stand-in tool (`append-to-sheet`) to avoid extra setup.
@@ -27,6 +31,4 @@ Google Sheets via MCP
 - Suggested schema for rows: `{ timestamp, userPrompt, responseType, summary, sources[] }`.
 
 Notes
-- Network access is required for crawling. The crawl is origin-bound by default and limited by `maxPages` and `maxDepth`.
-- Keep within the website’s robots and terms.
-
+- This setup does not have the agent scraping; the page just displays the site and your CometChat widget handles Q&A.
