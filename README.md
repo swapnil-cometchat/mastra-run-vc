@@ -39,6 +39,17 @@ FAQs from Google Sheets
 - Make the sheet accessible: Share with “Anyone with the link can view” or Publish to the web.
 - The agent calls the `faq-sheets-qa` tool first for every question and uses its answer if a close match is found.
 
+Static portfolio data
+- The agent can answer portfolio questions from a static file: `data/runvc_portfolio.json`.
+- Format:
+  {
+    "companies": [ { "name": "Company", "website": "https://...", "logo": "(optional)", "description": "(optional)" } ]
+  }
+- Edit this file any time; no rebuild required. The `portfolio-static` tool reads it at runtime.
+- If running via `mastra dev` where the working dir is `.mastra/output`, the tool looks in:
+  - `.mastra/output/data/runvc_portfolio.json`, then `../data/runvc_portfolio.json` (repo root)
+  - Or set `RUNVC_PORTFOLIO_PATH=/absolute/path/to/runvc_portfolio.json` to override.
+
 Pre-crawl and index (recommended for QA)
 - Crawl run.vc and build a local vector index:
   - `npm run crawl:runvc` — fetches pages into `data/runvc_pages.json`
