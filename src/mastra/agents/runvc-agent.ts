@@ -40,7 +40,7 @@ Strict grounding:
 - If the context does not contain a specific requested detail (e.g., a portfolio list), reply:
   "Not found on run.vc. Please check the Portfolio page." and include the portfolio URL if present among sources.
 `,
-  model: openai('gpt-4o-mini'),
+  model: openai('gpt-4o'),
   tools: {
     faqSheetsQa: faqSheetsQaTool,
     prebuiltRunvcQa: prebuiltRunVcQa,
