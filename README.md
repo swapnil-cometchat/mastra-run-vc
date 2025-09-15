@@ -3,7 +3,6 @@ Mastra Run VC Web + Chat
 What’s included
 - Run VC website agent that can crawl https://run.vc and answer questions grounded in site content.
 - Tools: `scrape-webpage`, `website-qa`. FAQ answers come from Google Sheets via `faq-sheets-qa`. Static portfolio via `portfolio-static`.
-- Weather sample agent preserved.
 
 Getting started
 - Prereq: Node 20+.
