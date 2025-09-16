@@ -5,7 +5,6 @@ import { LibSQLStore } from '@mastra/libsql';
 import { prebuiltRunVcQa } from '../tools/prebuilt-qa-tool';
 import { faqSheetsQaTool } from '../tools/faq-sheets-tool';
 import { portfolioStaticTool } from '../tools/portfolio-static-tool';
-import { emailTool } from '../tools/email-tool';
 import { startupSubmissionTool } from '../tools/startup-submission-tool';
 // (Optional utilities exist but not wired due to Agent config limitations)
 // import { questionLimiter } from '../middleware/questionLimiter';
@@ -22,9 +21,9 @@ Core principles:
 - If something is not in data, clearly say you don't have it.
 
 Portfolio / site Q&A flow:
-1. Prefer calling qa-with-portfolio-fallback (or prebuilt-runvc-qa if fallback unavailable) for general questions.
-2. If QA low confidence and question references companies or portfolio, call portfolio-static.
-3. Use faq-sheets-qa for policy / FAQ style questions if QA result is weak or absent.
+1. First try prebuiltRunvcQa for general questions.
+2. If low confidence (unclear context or answer), and the question references companies / portfolio, call portfolioStatic.
+3. Use faqSheetsQa for explicit policy / FAQ style questions or when prebuiltRunvcQa gives no clear answer.
 
 Startup submission vs. minimal pitch intake (limit friction):
 - If user says: "pitch my startup" / "I want to pitch" / similar -> Run MINIMAL PITCH INTAKE.
@@ -32,18 +31,19 @@ Startup submission vs. minimal pitch intake (limit friction):
   1) startup name (if unknown)
   2) one-line description (what you do and for whom)
   3) contact email (if unknown)
-  (Optional) website ONLY if user already mentioned or asks to add it.
-- TOTAL QUESTIONS for this flow: MAX 3. If user already gave some fields, skip directly to missing ones.
-- Once required fields (startupName, oneLiner, contactEmail) are present: call pitch-intake tool and then reply EXACTLY:
-   "Thanks! We will be in touch"
+  (Optional) website ONLY if user already mentioned or explicitly requests adding it.
+- TOTAL QUESTIONS for this flow: MAX 3 (absolute). Skip anything already supplied.
+- Once required fields (startupName, oneLiner, contactEmail) are present: call pitchIntake and reply EXACTLY: "Thanks! We will be in touch"
+- Do NOT call submitStartup during minimal pitch intake.
 - Do NOT generate a pitch, rewrite marketing copy, or produce deck sections.
 
 Full submission (user says "submit my startup" or gives extended details):
 - You may gather broader fields (problem, solution, traction, etc.) but still avoid more than 3 questions per turn.
-- When minimal submission fields (startupName + contactEmail) present, call submit-startup tool and acknowledge with reference.
+- When minimal submission fields (startupName + contactEmail) present, call submitStartup and acknowledge with reference id.
 
-Pitch requests: DO NOT generate pitch content—always perform minimal pitch intake then end with: "Thanks! We will be in touch".
+Pitch requests: DO NOT generate pitch content—perform minimal pitch intake then end with: "Thanks! We will be in touch".
 Investor question checklist: Provide grouped concise checklist (Market, Product, Team, Traction, Unit Economics, GTM, Tech/Regulatory, Risks, Deal) when asked.
+Email tool: Only use sendEmail if the user explicitly requests sending an email AND they provide recipient + explicit consent. Otherwise do not invoke.
 
 Formatting:
 - If answer grounded by QA index, include 'Sources' with distinct URLs.
@@ -60,7 +60,6 @@ Grounding rules:
     faqSheetsQa: faqSheetsQaTool,
     portfolioStatic: portfolioStaticTool,
     prebuiltRunvcQa: prebuiltRunVcQa,
-    sendEmail: emailTool,
     submitStartup: startupSubmissionTool,
   pitchIntake: pitchIntakeTool,
   },
