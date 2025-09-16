@@ -1,6 +1,5 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
-import { saveJsonRecord } from './storage-util';
 import { writeFile, appendFile, mkdir } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
@@ -18,13 +17,11 @@ export const pitchIntakeTool = createTool({
   id: 'pitch-intake',
   description: 'Store a minimal pitch intake (startupName, oneLiner, contactEmail, optional website/description) for Run VC follow-up.',
   inputSchema: PitchIntakeSchema,
-  outputSchema: z.object({ id: z.string(), savedPaths: z.array(z.string()), primaryPath: z.string() }),
+  outputSchema: z.object({ id: z.string(), csvPath: z.string() }),
   execute: async ({ context }) => {
     const id = `pitch-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const record = { kind: 'pitch-intake', id, submittedAt: new Date().toISOString(), ...context };
-    const res = await saveJsonRecord({ subDir: 'pitch_submissions', prefix: 'pitch', record, id, fileName: `${id}.json` });
-
-    // Append to CSV (for external spreadsheet ingestion)
+    // Append to CSV (for external spreadsheet ingestion only)
     try {
       const dir = join(process.cwd(), 'data');
       if (!existsSync(dir)) await mkdir(dir, { recursive: true });
@@ -48,10 +45,9 @@ export const pitchIntakeTool = createTool({
         record.description || ''
       ].map(esc).join(',') + '\n';
       await appendFile(csvPath, row, 'utf8');
+      return { id: record.id, csvPath };
     } catch {
-      // non-fatal
+      throw new Error('Failed to persist pitch intake to CSV');
     }
-
-    return { id: res.id, savedPaths: res.savedPaths, primaryPath: res.primaryPath };
   },
 });
