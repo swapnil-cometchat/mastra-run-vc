@@ -81,10 +81,9 @@
 
       // Read UID from query (?uid=...) or fallback to placeholder
       const params = new URLSearchParams(location.search);
-      const COMETCHAT_USER_UID = 'cometchat-uid-1';
+      const COMETCHAT_USER_UID = params.get('uid') || 'cometchat-uid-1';
 
       function setIframeFromQuery() {
-        const params = new URLSearchParams(location.search);
         const u = params.get('u') || 'https://run.vc';
         const frame = document.getElementById('site-frame');
         try {

@@ -3,7 +3,6 @@ import { z } from 'zod';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { createHash } from 'node:crypto';
 
 // Inlined minimal embedding utilities (previously in embedding-util.ts) to reduce file count.
 // cosineSimilarity: compute similarity between two equal-length numeric vectors.
@@ -53,12 +52,16 @@ let cache: { index?: IndexFile } = {};
 async function loadIndex(): Promise<IndexFile> {
   if (cache.index) return cache.index;
   const override = process.env.RUNVC_INDEX_PATH;
-  const candidates = [
-    override ? resolve(override) : undefined,
-    join(process.cwd(), 'data', 'runvc_index.json'), // .mastra/output/data
-    resolve(process.cwd(), '..', '..', 'data', 'runvc_index.json'), // repoRoot/data when cwd=.mastra/output
-    resolve(process.cwd(), 'data', 'runvc_index.json'), // cwd already repo root
-  ].filter(Boolean) as string[];
+  const candidates = Array.from(
+    new Set(
+      [
+        override ? resolve(override) : undefined,
+        join(process.cwd(), 'data', 'runvc_index.json'), // .mastra/output/data
+        resolve(process.cwd(), '..', '..', 'data', 'runvc_index.json'), // repoRoot/data when cwd=.mastra/output
+        resolve(process.cwd(), 'data', 'runvc_index.json'), // cwd already repo root
+      ].filter(Boolean) as string[],
+    ),
+  );
 
   const path = candidates.find((p) => existsSync(p));
   if (!path) {

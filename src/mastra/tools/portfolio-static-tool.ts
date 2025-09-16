@@ -28,14 +28,18 @@ export const portfolioStaticTool = createTool({
   execute: async ({ context }) => {
     const { query, limit } = context;
     const override = process.env.RUNVC_PORTFOLIO_PATH;
-    const candidates = [
-      override ? resolve(override) : undefined,
-      // When running under mastra dev, cwd is typically .mastra/output
-      join(process.cwd(), 'data', 'runvc_portfolio.json'), // .mastra/output/data/runvc_portfolio.json
-      resolve(process.cwd(), '..', '..', 'data', 'runvc_portfolio.json'), // repoRoot/data/runvc_portfolio.json
-      // Fallback attempt (in case cwd is repo root already)
-      resolve(process.cwd(), 'data', 'runvc_portfolio.json'),
-    ].filter(Boolean) as string[];
+    const candidates = Array.from(
+      new Set(
+        [
+          override ? resolve(override) : undefined,
+          // When running under mastra dev, cwd is typically .mastra/output
+          join(process.cwd(), 'data', 'runvc_portfolio.json'), // .mastra/output/data/runvc_portfolio.json
+          resolve(process.cwd(), '..', '..', 'data', 'runvc_portfolio.json'), // repoRoot/data/runvc_portfolio.json
+          // Fallback attempt (in case cwd is repo root already)
+          resolve(process.cwd(), 'data', 'runvc_portfolio.json'),
+        ].filter(Boolean) as string[],
+      ),
+    );
 
     const path = candidates.find((p) => existsSync(p));
     if (!path) {

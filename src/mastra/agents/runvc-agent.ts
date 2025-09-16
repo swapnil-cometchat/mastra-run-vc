@@ -5,10 +5,6 @@ import { LibSQLStore } from '@mastra/libsql';
 import { prebuiltRunVcQa } from '../tools/prebuilt-qa-tool';
 import { faqSheetsQaTool } from '../tools/faq-sheets-tool';
 import { portfolioStaticTool } from '../tools/portfolio-static-tool';
-// Deprecated: rich startup submission tool removed from active use.
-// (Optional utilities exist but not wired due to Agent config limitations)
-// import { questionLimiter } from '../middleware/questionLimiter';
-// import { captureDescription } from '../middleware/captureDescription';
 import { pitchIntakeTool } from '../tools/pitch-intake-tool';
 
 export const runVcAgent = new Agent({
@@ -40,7 +36,7 @@ Startup submission (minimal pitch intake – REQUIRED BEHAVIOR):
   (Optional) website ONLY if user already mentioned or explicitly requests adding it.
 - TOTAL QUESTIONS for this flow: MAX 3 (absolute). Skip anything already supplied.
 - Once required fields (startupName, oneLiner, contactEmail) are present: call pitchIntake and reply EXACTLY: "Thanks! We will be in touch"
-- Do NOT call submitStartup during minimal pitch intake.
+- Do NOT invoke any other submission tooling during minimal pitch intake.
 - Do NOT generate a pitch, rewrite marketing copy, or produce deck sections.
 
 Failure cases:
