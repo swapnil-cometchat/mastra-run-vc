@@ -3,7 +3,47 @@ import { z } from 'zod';
 import { readFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { embedTexts, cosineSimilarity } from './embedding-util';
+import { createHash } from 'node:crypto';
+
+// Inlined minimal embedding utilities (previously in embedding-util.ts) to reduce file count.
+// cosineSimilarity: compute similarity between two equal-length numeric vectors.
+function cosineSimilarity(a: number[], b: number[]): number {
+  let dot = 0;
+  let na = 0;
+  let nb = 0;
+  for (let i = 0; i < a.length; i++) {
+    const x = a[i];
+    const y = b[i];
+    dot += x * y;
+    na += x * x;
+    nb += y * y;
+  }
+  return dot / (Math.sqrt(na) * Math.sqrt(nb) + 1e-8);
+}
+
+// embedTexts: call OpenAI embeddings endpoint for given texts.
+async function embedTexts(
+  texts: string[],
+  model: string,
+  apiKey = process.env.OPENAI_API_KEY as string,
+): Promise<number[][]> {
+  if (!apiKey) throw new Error('OPENAI_API_KEY is required for embeddings');
+  const body = { model, input: texts } as const;
+  const res = await fetch('https://api.openai.com/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    throw new Error(`Embeddings failed: ${res.status} ${res.statusText} - ${t}`);
+  }
+  const json = (await res.json()) as { data: { embedding: number[] }[] };
+  return json.data.map((d) => d.embedding);
+}
 
 type IndexItem = { id: string; url: string; text: string; embedding: number[] };
 type IndexFile = { model: string; createdAt: string; items: IndexItem[] };
