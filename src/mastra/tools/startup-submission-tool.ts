@@ -1,3 +1,7 @@
+/**
+ * DEPRECATED: This richer submission tool is no longer invoked by the agent.
+ * Retained for potential future extended intake or manual batch processing.
+ */
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
 import { saveJsonRecord } from './storage-util';
