@@ -1,8 +1,10 @@
-Mastra Run VC Web + Chat
+Mastra Run VC Minimal Agent
 
-What’s included
-- Run VC website agent that pre-crawls https://run.vc and answers from that saved data.
-- Tools: `prebuilt-runvc-qa` (website index), `faq-sheets-qa` (Google Sheet), `portfolio-static` (static JSON).
+What’s included (final minimal scope)
+- Prebuilt run.vc website Q&A: `prebuilt-runvc-qa` (answers strictly from indexed site chunks)
+- Portfolio company Q&A: `portfolio-static` (static JSON list)
+- FAQ Sheet Q&A: `faq-sheets-qa` (Google Sheet tab)
+- Minimal pitch intake (CSV append only): `pitch-intake`
 
 Getting started
 - Prereq: Node 20+.
@@ -47,9 +49,11 @@ Static portfolio data
   - `.mastra/output/data/runvc_portfolio.json`, then `../data/runvc_portfolio.json` (repo root)
   - Or set `RUNVC_PORTFOLIO_PATH=/absolute/path/to/runvc_portfolio.json` to override.
 
-Answering priority
-- Company-specific questions: checks static portfolio data first (portfolio-static), then FAQs, then the website index.
-- All other questions: checks FAQs first (faq-sheets-qa), then falls back to the website index (prebuilt-runvc-qa).
+Answering behavior
+- Portfolio questions: use portfolio static data (list or details). If not found, reply "Not found on run.vc. Please check the Portfolio page." (as configured in agent instructions).
+- FAQ-style questions: try FAQ sheet; if low match or missing, fallback to website index.
+- General run.vc questions: website index.
+- Pitch intent: trigger minimal pitch intake flow (see below).
 
 Pre-crawl and index (website data)
 - Crawl run.vc and build a local vector index:
@@ -63,18 +67,41 @@ Pre-crawl and index (website data)
 
  
 
-Wiring to your chat backend
-- If you want an HTTP endpoint to serve answers from the prebuilt index (for CometChat webhooks or extensions), I can add `POST /api/ask` that reads `data/runvc_index.json`, embeds the query, retrieves top-K, and returns `{ answer, sources }`.
-Emailing pitches
-- The agent can email a generated pitch using the `send-email` tool.
-- Configure SendGrid (recommended):
-  - `EMAIL_PROVIDER=sendgrid`
-  - `SENDGRID_API_KEY=<your key>`
-  - `EMAIL_FROM=<verified sender, e.g., no-reply@yourdomain>`
-  - Optional default recipient: `RUNVC_PITCH_TO=swapnil.godambe@comechat.com`
-- If SendGrid is not configured, emails are written to `data/outbox/email-*.json` for review.
+Minimal pitch intake (strict)
+The agent collects at most 3 short items ONLY when the user clearly expresses intent to pitch:
+1. Startup name (if not already given)
+2. One-line description
+3. Contact email
+Optional: website ONLY if explicitly provided already; not a separate question.
+After required fields present it appends a row to `data/pitch_intakes.csv` with: id,timestamp,startupName,oneLiner,contactEmail,website(optional) and replies exactly: `Thanks! We will be in touch`.
+No pitch generation, no extended questionnaire, no emailing.
 
-Startup submissions (no pitch generation)
-- The agent collects basic startup details conversationally and saves a JSON submission locally via `submit-startup`.
-- Files are written to `.mastra/output/data/submissions/submission-<id>.json` and mirrored to `data/submissions/` at repo root if available.
-- Minimum fields to submit: `startupName` and `contactEmail`. Optional fields: `website`, `oneLiner`, `problem`, `solution`, `targetCustomer`, `stageOrTraction`, `businessModel`, `goToMarket`, `competition`, `team`, `location`, `fundingAsk`, `deckUrl`, `notes`.
+Removed / deprecated (intentionally not present anymore)
+- Email tooling & outbound pitch emails
+- Rich multi-question startup submission (`submit-startup`)
+- Middleware prototypes (question limiting / description capture)
+- JSON submission mirroring (CSV only now)
+
+Environment variables in use
+- `OPENAI_API_KEY` - required for embeddings & model
+- `RUNVC_FAQ_SHEET_URL` - public/shareable Google Sheet link
+- `RUNVC_FAQ_TTL_MINUTES` - optional cache TTL (default 10)
+Optional / can remove if present: legacy email vars (`EMAIL_PROVIDER`, `SENDGRID_API_KEY`, `EMAIL_FROM`, `RUNVC_PITCH_TO`).
+
+Regenerating site index
+Commands remain the same:
+`npm run crawl:runvc` -> updates `data/runvc_pages.json`
+`npm run index:runvc` -> updates `data/runvc_index.json`
+Index tool looks for `data/runvc_index.json`. Override path with `RUNVC_INDEX_PATH`.
+
+Development
+`npm install`
+`npm run dev` (agent playground) or `npm run web` (embed demo page)
+
+Data files summary
+- `data/runvc_index.json` (website chunks + embeddings)
+- `data/runvc_pages.json` (raw crawled pages)
+- `data/runvc_portfolio.json` (portfolio companies)
+- `data/pitch_intakes.csv` (minimal pitch submissions)
+
+License: Internal / experimental.
