@@ -74,6 +74,7 @@ The agent collects at most 3 short items ONLY when the user clearly expresses in
 3. Contact email
 Optional: website ONLY if explicitly provided already; not a separate question.
 After required fields present it appends a row to `data/pitch_intakes.csv` with: id,timestamp,startupName,oneLiner,contactEmail,website(optional) and replies exactly: `Thanks! We will be in touch`.
+If Google Sheets access is configured (`GOOGLE_SERVICE_ACCOUNT_KEY`, `RUNVC_PITCH_SHEET_ID`, optional `RUNVC_PITCH_TAB_NAME`), each submission is also appended to that sheet.
 No pitch generation, no extended questionnaire, no emailing.
 
 Removed / deprecated (intentionally not present anymore)
@@ -86,6 +87,9 @@ Environment variables in use
 - `OPENAI_API_KEY` - required for embeddings & model
 - `RUNVC_FAQ_SHEET_URL` - public/shareable Google Sheet link
 - `RUNVC_FAQ_TTL_MINUTES` - optional cache TTL (default 10)
+- `GOOGLE_SERVICE_ACCOUNT_KEY` - base64 Google service account JSON for Sheets append (optional)
+- `RUNVC_PITCH_SHEET_ID` - Sheet ID to append minimal pitch rows into (optional)
+- `RUNVC_PITCH_TAB_NAME` - Tab name for append range; defaults to `Sheet1` when unset (optional)
 Optional / can remove if present: legacy email vars (`EMAIL_PROVIDER`, `SENDGRID_API_KEY`, `EMAIL_FROM`, `RUNVC_PITCH_TO`).
 
 Regenerating site index
