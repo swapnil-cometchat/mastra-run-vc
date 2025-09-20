@@ -5,12 +5,32 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { google, sheets_v4 } from 'googleapis';
 
+const WEBSITE_PLACEHOLDERS = new Set([
+  'none',
+  'n/a',
+  'na',
+  'no website',
+  'no',
+  'not available',
+]);
+
+const WebsiteFieldSchema = z.preprocess(
+  (value) => {
+    if (typeof value !== 'string') return value;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    if (WEBSITE_PLACEHOLDERS.has(trimmed.toLowerCase())) return undefined;
+    return trimmed;
+  },
+  z.union([z.string().url(), z.undefined()])
+);
+
 // Expanded pitch intake: capture the targeted set of fields gathered by the agent.
 const PitchIntakeSchema = z.object({
   startupName: z.string().min(1, 'startupName required'),
-  oneLiner: z.string().min(5, 'Provide a short one-liner'),
+  oneLiner: z.string().min(3, 'Provide a short one-liner'),
   contactEmail: z.string().email('Valid contactEmail required'),
-  website: z.string().url().optional(),
+  website: WebsiteFieldSchema.optional(),
   description: z.string().optional(),
   companyStage: z.string().min(2, 'Provide a brief company stage').optional(),
   traction: z.string().min(2, 'Share a short traction highlight').optional(),
