@@ -5,13 +5,15 @@ import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { google, sheets_v4 } from 'googleapis';
 
-// Minimal pitch intake: only these fields.
+// Expanded pitch intake: capture the targeted set of fields gathered by the agent.
 const PitchIntakeSchema = z.object({
   startupName: z.string().min(1, 'startupName required'),
   oneLiner: z.string().min(5, 'Provide a short one-liner'),
   contactEmail: z.string().email('Valid contactEmail required'),
   website: z.string().url().optional(),
   description: z.string().optional(),
+  companyStage: z.string().min(2, 'Provide a brief company stage').optional(),
+  traction: z.string().min(2, 'Share a short traction highlight').optional(),
 });
 
 type PitchRecord = {
@@ -23,6 +25,8 @@ type PitchRecord = {
   contactEmail: string;
   website?: string;
   description?: string;
+  companyStage?: string;
+  traction?: string;
 };
 
 const SHEETS_SCOPE = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -74,7 +78,17 @@ async function appendCsv(record: PitchRecord): Promise<string> {
     const dir = join(process.cwd(), 'data');
     if (!existsSync(dir)) await mkdir(dir, { recursive: true });
     const csvPath = join(dir, 'pitch_intakes.csv');
-    const headers = ['id', 'submittedAt', 'startupName', 'oneLiner', 'contactEmail', 'website', 'description'];
+    const headers = [
+      'id',
+      'submittedAt',
+      'startupName',
+      'oneLiner',
+      'contactEmail',
+      'website',
+      'description',
+      'companyStage',
+      'traction',
+    ];
     if (!existsSync(csvPath)) {
       await writeFile(csvPath, headers.join(',') + '\n', 'utf8');
     }
@@ -91,6 +105,8 @@ async function appendCsv(record: PitchRecord): Promise<string> {
       record.contactEmail,
       record.website || '',
       record.description || '',
+      record.companyStage || '',
+      record.traction || '',
     ]
       .map(esc)
       .join(',') + '\n';
@@ -105,7 +121,7 @@ async function appendToGoogleSheet(record: PitchRecord) {
   const config = loadSheetsConfig();
   if (!config) return null;
   const sheets = await getSheetsClient(config);
-  const range = `${config.tabName}!A:G`;
+  const range = `${config.tabName}!A:I`;
   await sheets.spreadsheets.values.append({
     spreadsheetId: config.spreadsheetId,
     range,
@@ -120,6 +136,8 @@ async function appendToGoogleSheet(record: PitchRecord) {
           record.contactEmail,
           record.website || '',
           record.description || '',
+          record.companyStage || '',
+          record.traction || '',
         ],
       ],
     },
@@ -129,7 +147,8 @@ async function appendToGoogleSheet(record: PitchRecord) {
 
 export const pitchIntakeTool = createTool({
   id: 'pitch-intake',
-  description: 'Store a minimal pitch intake (startupName, oneLiner, contactEmail, optional website/description) for Run VC follow-up.',
+  description:
+    'Store a pitch intake (startupName, oneLiner, contactEmail, optional website/description/companyStage/traction) for Run VC follow-up.',
   inputSchema: PitchIntakeSchema,
   outputSchema: z.object({
     id: z.string(),
