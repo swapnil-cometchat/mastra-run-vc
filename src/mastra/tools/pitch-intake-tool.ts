@@ -22,7 +22,7 @@ const WebsiteFieldSchema = z.preprocess(
     if (WEBSITE_PLACEHOLDERS.has(trimmed.toLowerCase())) return undefined;
     return trimmed;
   },
-  z.union([z.string().url(), z.undefined()])
+  z.union([z.string(), z.undefined()])
 );
 
 // Expanded pitch intake: capture the targeted set of fields gathered by the agent.
